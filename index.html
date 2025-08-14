@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Helper</title>
+
+    <!-- CSS Styles Embedded Directly -->
+    <style>
+        /* --- CSS Variables --- */
+        :root {
+            /* Light Theme */
+            --bg-gradient-start: #eef2f3;
+            --bg-gradient-end: #f4f7f8;
+            --container-bg: #ffffff;
+            --text-color: #212529;
+            --heading-color: #0056b3;
+            --label-color: #495057;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --input-focus-border: #86b7fe;
+            --input-focus-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            --input-text: #212529;
+            --button-bg: #0d6efd;
+            --button-text: #ffffff;
+            --button-hover-bg: #0b5ed7;
+            --button-active-bg: #0a58ca;
+            --link-color: #0d6efd;
+            --subtle-text: #6c757d;
+            --warning-text-color: #dc3545;
+            --disabled-bg: #e9ecef;
+            --disabled-text: #adb5bd;
+            --shadow-color: rgba(0, 0, 0, 0.075);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --select-arrow: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2216%22 height%3D%2216%22 fill%3D%22%23212529%22 viewBox%3D%220 0 16 16%22%3E%3Cpath fill-rule%3D%22evenodd%22 d%3D%22M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z%22/%3E%3C/svg%3E');
+            --datetime-text: #495057;
+        }
+
+        /* Dark Theme Overrides */
+        body.dark-theme {
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #16213e;
+            --container-bg: #2c3047; /* Darker container */
+            --text-color: #e0e0e0;
+            --heading-color: #6bb8f8; /* Lighter blue */
+            --label-color: #adb5bd;
+            --input-bg: #3a3f5a;   /* Slightly different dark */
+            --input-border: #5a617f;
+            --input-focus-border: #7aa5ce;
+            --input-focus-shadow: 0 0 0 0.25rem rgba(67, 117, 172, 0.35);
+            --input-text: #e0e0e0;
+            --button-bg: #1e88e5; /* Slightly brighter blue in dark */
+            --button-text: #ffffff;
+            --button-hover-bg: #1976d2;
+            --button-active-bg: #1565c0;
+            --link-color: #6bb8f8;
+            --subtle-text: #9ea8b7;
+            --warning-text-color: #f88070;
+            --disabled-bg: #4a4f6a;
+            --disabled-text: #7b819b;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --shadow-hover: rgba(0, 0, 0, 0.3);
+            --select-arrow: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2216%22 height%3D%2216%22 fill%3D%22%23adb5bd%22 viewBox%3D%220 0 16 16%22%3E%3Cpath fill-rule%3D%22evenodd%22 d%3D%22M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z%22/%3E%3C/svg%3E');
+            --datetime-text: #adb5bd;
+        }
+
+        /* --- Base Styles & Fonts --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            line-height: 1.6;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-color);
+            padding: 15px;
+            min-height: 100vh;
+            transition: background 0.5s, color 0.3s;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Layout & Container --- */
+        .container {
+            background-color: var(--container-bg);
+            padding: 25px 30px; /* Increased padding */
+            border-radius: 12px; /* Softer corners */
+            box-shadow: 0 4px 15px var(--shadow-color);
+            max-width: 650px; /* Slightly wider */
+            margin: 30px auto;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            animation: fadeIn 0.6s ease-out forwards; /* Apply fade-in */
+        }
+
+        /* --- Date/Time Display --- */
+        #datetime-display {
+            position: fixed; /* Fixed position */
+            top: 10px;
+            right: 15px;
+            font-size: 0.85em;
+            color: var(--datetime-text);
+            background-color: rgba(var(--container-bg), 0.8); /* Semi-transparent */
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 10; /* Make sure it's above other content */
+            transition: color 0.3s, background-color 0.3s;
+        }
+
+
+        /* --- Headings and Text --- */
+        h1 {
+            color: var(--heading-color);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.75em; /* Slightly larger */
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        p {
+            margin-bottom: 15px;
+            font-size: 1em;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+
+        /* --- Form Styling --- */
+        .form-group {
+            margin-bottom: 25px; /* More space */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px; /* More space below label */
+            font-weight: 500; /* Slightly less bold */
+            font-size: 1em;
+            color: var(--label-color);
+            transition: color 0.3s;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px 15px; /* More padding */
+            border: 1px solid var(--input-border);
+            border-radius: 6px; /* Match container */
+            font-size: 1em;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.2s ease-in-out; /* Added box-shadow transition */
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: var(--input-focus-border);
+            outline: 0;
+            box-shadow: var(--input-focus-shadow); /* Glow effect on focus */
+        }
+
+        input[type="text"]:disabled,
+        select:disabled {
+            background-color: var(--disabled-bg);
+            color: var(--disabled-text);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: var(--select-arrow);
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px auto;
+            padding-right: 40px; /* Ensure space for arrow */
+        }
+
+        /* Hover effect for options (limited support) */
+        select option:hover {
+             background-color: var(--button-hover-bg); /* Use button hover color */
+             color: var(--button-text);
+        }
+
+        optgroup {
+            font-weight: 600; /* Bolder group label */
+            font-style: normal;
+        }
+
+        small {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.85em;
+            color: var(--subtle-text);
+            transition: color 0.3s;
+        }
+
+        .warning-text {
+            color: var(--warning-text-color);
+            font-size: 0.85em;
+            margin-top: 5px;
+            min-height: 1.2em; /* Ensure space */
+            transition: color 0.3s;
+        }
+
+        /* --- Advanced Options Section --- */
+        details {
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            margin-top: 20px;
+            background-color: rgba(0,0,0,0.02); /* Slight bg tint */
+            transition: background-color 0.3s;
+        }
+        body.dark-theme details {
+             background-color: rgba(255,255,255,0.03);
+             border-color: var(--input-border);
+        }
+
+        summary {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--label-color);
+            list-style-type: '⚙️ '; /* Gear icon (might vary by browser/OS) */
+            transition: color 0.3s;
+        }
+        summary:hover {
+            color: var(--heading-color);
+        }
+
+        details[open] > summary {
+            list-style-type: '⚙️ '; /* Keep icon consistent */
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .details-content {
+            padding: 15px 20px;
+        }
+        /* Hide default arrow */
+        summary::-webkit-details-marker { display: none; }
+        summary::marker { display: none; }
+
+
+        /* --- Button Styling --- */
+        .search-button {
+            display: flex; /* Use flex for icon alignment */
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Space between icon and text */
+            width: 100%;
+            padding: 14px 20px; /* Slightly taller */
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.15s ease, filter 0.15s ease; /* Add transform/filter */
+            margin-top: 20px;
+        }
+
+        .search-button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-2px); /* Slight lift */
+            box-shadow: 0 6px 12px var(--shadow-hover);
+        }
+
+        .search-button:active {
+             background-color: var(--button-active-bg);
+             transform: translateY(0px); /* Press down */
+             filter: brightness(0.95); /* Slight dim */
+             box-shadow: 0 3px 6px var(--shadow-hover);
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            font-size: 0.85em;
+            text-align: center;
+            color: var(--subtle-text);
+            transition: color 0.3s;
+        }
+
+    </style>
+    <!-- End of CSS Styles -->
+
+</head>
+<body>
+    <!-- Date/Time Display Area -->
+    <div id="datetime-display">Loading...</div>
+
+    <div class="container">
+        <h1>Search Helper</h1>
+        <p>Select an engine, fill the fields, and search the internet.</p>
+
+        <!-- The search form -->
+        <form id="searchForm">
+
+            <div class="form-group">
+                <label for="searchEngine">Search Using:</label>
+                <select id="searchEngine" name="searchEngine">
+                    <optgroup label="General Purpose">
+                        <option value="google" selected>Google</option>
+                        <option value="duckduckgo">DuckDuckGo</option>
+                        <option value="bing">Bing</option>
+                    </optgroup>
+                    <optgroup label="Academic">
+                        <option value="google_scholar">Google Scholar</option>
+                    </optgroup>
+                    <optgroup label="Images">
+                        <option value="google_images">Google Images</option>
+                        <option value="bing_images">Bing Images</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="keywords">Keywords:</label>
+                <input type="text" id="keywords" name="keywords" placeholder="Enter search terms..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="filetype">File Type (if supported):</label>
+                <select id="filetype" name="filetype">
+                    <option value="">Any File Type</option>
+                    <option value="pdf">PDF</option>
+                    <option value="docx">DOCX (Word)</option>
+                    <option value="pptx">PPTX (PowerPoint)</option>
+                    <option value="xlsx">XLSX (Excel)</option>
+                    <option value="jpg">JPG Image</option>
+                    <option value="png">PNG Image</option>
+                    <option value="gif">GIF Image</option>
+                    <option value="mp4">MP4 Video</option> {/* Added */}
+                    <option value="mp3">MP3 Audio</option>
+                    <option value="zip">ZIP Archive</option> {/* Added */}
+                    <option value="exe">EXE Executable</option> {/* Added */}
+                    <option value="iso">ISO Disk Image</option> {/* Added */}
+                </select>
+                 <small id="fileWarning" class="warning-text"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="daterange">Date Range (if supported):</label>
+                <select id="daterange" name="daterange">
+                    <option value="">Any Time</option>
+                    <option value="d">Past 24 hours</option>
+                    <option value="w">Past week</option>
+                    <option value="m">Past month</option>
+                    <option value="y">Past year</option>
+                </select>
+                 <small id="dateWarning" class="warning-text"></small>
+            </div>
+
+            <!-- Advanced Options Section -->
+            <details>
+                <summary>Advanced Options</summary>
+                <div class="details-content">
+                    <div class="form-group">
+                         <label for="siteRestrict">Search Within a Site (Optional):</label>
+                         <input type="text" id="siteRestrict" name="siteRestrict" placeholder="e.g., wikipedia.org or .gov">
+                         <small>Works best on general engines like Google, Bing, DDG.</small>
+                         <small id="siteWarning" class="warning-text"></small>
+                     </div>
+                     <!-- Add more advanced options here if needed -->
+                </div>
+            </details>
+            <!-- End Advanced Options -->
+
+
+            <button type="submit" class="search-button">
+                🔍 Search
+            </button>
+
+        </form>
+        <p class="footer-note">Reminder: Clicking 'Search' requires an internet connection.</p>
+
+    </div>
+
+    <!-- JavaScript Embedded Directly -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Apply Auto Theme ---
+            function applyAutoTheme() {
+                const currentHour = new Date().getHours();
+                const bodyElement = document.body;
+                const DARK_START_HOUR = 18; // 6 PM
+                const DARK_END_HOUR = 6;    // 6 AM
+                const isDarkTime = currentHour >= DARK_START_HOUR || currentHour < DARK_END_HOUR;
+
+                if (isDarkTime && !bodyElement.classList.contains('dark-theme')) {
+                    bodyElement.classList.add('dark-theme');
+                    console.log("Applying Dark Theme based on time.");
+                } else if (!isDarkTime && bodyElement.classList.contains('dark-theme')) {
+                    bodyElement.classList.remove('dark-theme');
+                    console.log("Applying Light Theme based on time.");
+                }
+            }
+            applyAutoTheme(); // Apply on load
+
+            // --- Update Date/Time Display ---
+            const dateTimeElement = document.getElementById('datetime-display');
+            function updateDateTime() {
+                const now = new Date();
+                const optionsDate = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+                const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }; // Use hour12: false for 24-hour format
+                const formattedDate = now.toLocaleDateString(undefined, optionsDate);
+                const formattedTime = now.toLocaleTimeString(undefined, optionsTime);
+                if (dateTimeElement) {
+                    dateTimeElement.textContent = `${formattedDate} | ${formattedTime}`;
+                }
+            }
+            updateDateTime(); // Initial call
+            setInterval(updateDateTime, 1000); // Update every second
+
+            // --- Search Engine Configuration (Condensed for brevity) ---
+             const searchEngines = {
+                 'google': { name: 'Google', baseUrl: 'https://www.google.com/search', queryParam: 'q', filetypePrefix: 'filetype:', sitePrefix: 'site:', dateParamName: 'tbs', dateValues: { 'd': 'qdr:d', 'w': 'qdr:w', 'm': 'qdr:m', 'y': 'qdr:y' }, supportsFileType: true, supportsSite: true, supportsDate: true },
+                 'duckduckgo': { name: 'DuckDuckGo', baseUrl: 'https://duckduckgo.com/', queryParam: 'q', filetypePrefix: 'filetype:', sitePrefix: 'site:', dateParamName: 'df', dateValues: { 'd': 'd', 'w': 'w', 'm': 'm' }, supportsFileType: true, supportsSite: true, supportsDate: true },
+                 'bing': { name: 'Bing', baseUrl: 'https://www.bing.com/search', queryParam: 'q', filetypePrefix: 'filetype:', sitePrefix: 'site:', dateParamName: '', dateValues: {}, supportsFileType: true, supportsSite: true, supportsDate: false },
+                 'google_scholar': { name: 'Google Scholar', baseUrl: 'https://scholar.google.com/scholar', queryParam: 'q', filetypePrefix: 'filetype:', sitePrefix: '', dateParamName: '', dateValues: {}, supportsFileType: true, supportsSite: false, supportsDate: false },
+                 'google_images': { name: 'Google Images', baseUrl: 'https://www.google.com/search', queryParam: 'q', filetypePrefix: 'filetype:', sitePrefix: 'site:', dateParamName: 'tbs', dateValues: { 'd': 'qdr:d', 'w': 'qdr:w', 'm': 'qdr:m', 'y': 'qdr:y' }, extraParams: '&tbm=isch', supportsFileType: true, supportsSite: true, supportsDate: true },
+                 'bing_images': { name: 'Bing Images', baseUrl: 'https://www.bing.com/images/search', queryParam: 'q', filetypePrefix: 'filetype:', sitePrefix: 'site:', dateParamName: '', dateValues: {}, extraParams: '', supportsFileType: true, supportsSite: true, supportsDate: false }
+            };
+
+            // --- Get DOM Elements ---
+            const searchForm = document.getElementById('searchForm');
+            const engineSelect = document.getElementById('searchEngine');
+            const keywordsInput = document.getElementById('keywords');
+            const filetypeSelect = document.getElementById('filetype');
+            const daterangeSelect = document.getElementById('daterange');
+            // Note: siteRestrictInput is inside the details element now
+            const fileWarning = document.getElementById('fileWarning');
+            const dateWarning = document.getElementById('dateWarning');
+            const siteWarning = document.getElementById('siteWarning'); // Still need this reference
+
+            // --- Function to update UI based on selected engine capabilities ---
+            function updateUiForEngine() {
+                 const selectedEngineKey = engineSelect.value;
+                 const config = searchEngines[selectedEngineKey];
+                 const siteRestrictInput = document.getElementById('siteRestrict'); // Get it here as it's within details
+
+                 filetypeSelect.disabled = !config.supportsFileType;
+                 daterangeSelect.disabled = !config.supportsDate;
+                 if (siteRestrictInput) siteRestrictInput.disabled = !config.supportsSite; // Disable if not supported
+
+                 fileWarning.textContent = config.supportsFileType ? '' : `File type filter may not work well with ${config.name}.`;
+                 dateWarning.textContent = config.supportsDate ? '' : `Date range filter may not work well with ${config.name}.`;
+                 if (siteWarning) siteWarning.textContent = config.supportsSite ? '' : `Site restriction filter may not work well with ${config.name}.`;
+
+
+                 const yearOption = daterangeSelect.querySelector('option[value="y"]');
+                 if (yearOption) {
+                     yearOption.disabled = !(config.dateValues && config.dateValues['y']);
+                     if (yearOption.disabled && daterangeSelect.value === 'y') {
+                         daterangeSelect.value = '';
+                     }
+                 }
+             }
+
+            // --- Event Listeners ---
+            engineSelect.addEventListener('change', updateUiForEngine);
+
+            searchForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const selectedEngineKey = engineSelect.value;
+                const config = searchEngines[selectedEngineKey];
+                let queryParts = [];
+                const keywords = keywordsInput.value.trim();
+                if (!keywords) { alert('Please enter search keywords.'); return; }
+                queryParts.push(keywords);
+                const filetype = filetypeSelect.value;
+                if (config.supportsFileType && filetype && config.filetypePrefix) { queryParts.push(`${config.filetypePrefix}${filetype}`); }
+
+                // Get site restrict value if the element exists
+                const siteRestrictInput = document.getElementById('siteRestrict');
+                const siteRestrict = siteRestrictInput ? siteRestrictInput.value.trim() : '';
+
+                if (config.supportsSite && siteRestrict && config.sitePrefix) {
+                    if (!siteRestrict.match(/^https?:\/\//) || siteRestrict.length > 8) { queryParts.push(`${config.sitePrefix}${siteRestrict}`); }
+                    else { alert('Please enter a valid site restriction (e.g., example.com or .gov), not just http://'); return; }
+                }
+                const mainQueryString = queryParts.join(' ');
+                const encodedQuery = encodeURIComponent(mainQueryString);
+                let finalUrl = `${config.baseUrl}?${config.queryParam}=${encodedQuery}`;
+                const dateValueKey = daterangeSelect.value;
+                if (config.supportsDate && dateValueKey && config.dateParamName && config.dateValues[dateValueKey]) {
+                    finalUrl += `&${config.dateParamName}=${encodeURIComponent(config.dateValues[dateValueKey])}`;
+                }
+                if (config.extraParams) { finalUrl += config.extraParams; }
+
+                console.log("Navigating to:", finalUrl);
+                try {
+                    // !! REQUIRES INTERNET !!
+                    window.location.href = finalUrl;
+                } catch (e) {
+                    console.error("Navigation failed:", e);
+                    alert("Could not navigate. Please check your internet connection.");
+                }
+            });
+
+            // --- Initial UI setup on page load ---
+            updateUiForEngine();
+
+        }); // End of DOMContentLoaded listener
+    </script>
+    <!-- End of JavaScript -->
+
+</body>
+</html>
