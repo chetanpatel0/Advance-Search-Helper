@@ -24,9 +24,9 @@ It supports **Google, DuckDuckGo, Bing, Google Scholar, Google Images, and Bing 
 4. Click **Search** to open results in the selected engine.
 
 ## Screenshot
-
+![Image](https://github.com/user-attachments/assets/a1e44062-c5c0-498f-9cf9-70bbf744b0fe)
 
 ## Installation
 Simply download or clone this repository:
 ```bash
-git clone https://github.com/chetanpatel0/search-helper.git
+git clone https://github.com/chetanpatel0/Advance-Search-Helper.git
